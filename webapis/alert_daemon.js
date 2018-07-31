@@ -120,4 +120,8 @@ var alertEventOwner = (e) => {
 console.log("Processing events");
 checkEvents();
 console.log("Processing accounts");
+<<<<<<< HEAD
 checkExpiredAccounts();
+=======
+checkExpiredAccounts();
+>>>>>>> origin/master
