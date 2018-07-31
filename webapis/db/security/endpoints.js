@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 
-const configd =require("configd");
+const configd = require("configd");
 const JWTKey = configd.JWTKey;
 
 const NoAccess = { "error": "unauthorized request." };
@@ -38,19 +38,19 @@ var CheckAppPermission = (req) => {
 }
 
 var VerifyRequest = (req) => {
-    //req.header(name)
+
+
     if (req.method == "OPTIONS") {
         delete req.body;
         delete req.query;
         return true;
     }
 
-    var jwttoken = req.header("JWT-TOKEN");
+    var jwttoken = req.header("token");
 
     if (req.session && req.session.token) {
         jwttoken = req.session.token;
     }
-
 
     try {
         var decoded = jwt.verify(jwttoken, JWTKey);
@@ -60,7 +60,6 @@ var VerifyRequest = (req) => {
 
         req.owner = decoded.userid;
 
-        req.verified = decoded.verified;
         return true;
 
     } catch (err) {
@@ -79,8 +78,9 @@ var Authenticator = (req, res, next) => {
             return;
         }
 
-        res.status(401).json({"error" : "unauthorized to use app."})
+        res.status(401).json({ "error": "unauthorized to use app." })
     } else {
+
         res.status(401).json(NoAccess);
     }
 }

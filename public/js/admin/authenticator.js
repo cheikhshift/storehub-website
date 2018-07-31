@@ -27,6 +27,11 @@ app.controller('authenticator', [
             }
         })
 
+        // check for JWT token
+        if (window.localStorage["token"]) {
+            window.location = "/admin.html";
+        }
+
         $scope.reset = () => {
             Ape.Request("POST",
                 "/api/reset_password", {
@@ -72,7 +77,10 @@ app.controller('authenticator', [
                         });
 
                         return;
-                    } else window.location = "/admin.html";
+                    } else {
+                        $scope.setCredentials(data);
+                        window.location = "/admin.html";
+                    }
                 });
         }
 
@@ -92,8 +100,17 @@ app.controller('authenticator', [
                         });
 
                         return;
-                    } else window.location = "/admin.html";
+                    } else {
+                        $scope.setCredentials(data);
+                        window.location = "/admin.html";
+                    }
                 });
+        }
+
+        $scope.setCredentials = (data) => {
+            window.localStorage["token"] = data.token;
+            window.localStorage["name"] = data.name;
+            window.localStorage["id"] = data.id;
         }
 
     }

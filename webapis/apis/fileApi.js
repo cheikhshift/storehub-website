@@ -3,7 +3,7 @@ var router = express.Router()
 var fileUpload = require('express-fileupload');
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
-const id  = mongoose.Types.ObjectId;
+const id = mongoose.Types.ObjectId;
 const authenticator = require("../db/security/endpoints")
 
 const File = require(`../db/models/file`)
@@ -25,9 +25,9 @@ router.delete('/file/:id', function(req, res) {
 
 
 router.post('/upload', function(req, res) {
-    //  if (!req.owner)
-   //     res.status(401).json(config.NoAccess);
-   // return;
+    if (!req.owner)
+        res.status(401).json(config.NoAccess);
+    return;
 
     if (!req.files)
         return res.status(400).send({ error: 'No files were uploaded.' });

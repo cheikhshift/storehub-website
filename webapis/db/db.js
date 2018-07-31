@@ -1,13 +1,13 @@
 var mongoose = require('mongoose');
 
-var email = require("./models/email")
-var event = require("./models/event")
-var image = require("./models/image")
-var location = require("./models/location")
-var product = require("./models/product")
-var website = require("./models/website")
-var alert = require("./models/alert")
-var mailchimp = require("./models/mailchimp")
+var email = require("./models/email"),
+    event = require("./models/event"),
+    image = require("./models/image"),
+    location = require("./models/location"),
+    product = require("./models/product"),
+    website = require("./models/website"),
+    alert = require("./models/alert"),
+    mailchimp = require("./models/mailchimp");
 
 
 var db = mongoose.connect('mongodb://localhost/test');
@@ -23,4 +23,4 @@ var models = [
 ];
 
 
-module.exports = {models : models , db : db};
+module.exports = { models: models, db: db };

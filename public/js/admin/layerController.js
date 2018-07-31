@@ -175,19 +175,13 @@ app.controller('layerController', [
                     $(".description", dv).html(alert.description);
 
                     if (!alert.link) {
-                        $("a.btn").remove();
+                        $("a.btn", dv).remove();
                     } else {
-                        $("a.btn").attr("href", alert.link);
+                        $("a.btn", dv).attr("href", alert.link);
                     }
 
                     dv.css('display', 'block');
                     dv.attr("data-id", alert._id);
-
-
-
-
-
-
                     ua.append(dv);
 
 
@@ -301,8 +295,7 @@ app.controller('layerController', [
             var uc = $(".user-controls"),
                 options = [
                     { name: "Account settings", modal: "account-modal" },
-                    { name: "Update password", modal: "password-modal" },
-                    { name: "Logout", modal: "logout" }
+                    { name: "Update password", modal: "password-modal" }
                 ];
             uc.html("");
 
@@ -310,6 +303,7 @@ app.controller('layerController', [
                 var option = options[i];
                 uc.append($(`<button onclick="modal('${option.modal}')" style="margin-top:10px;" class="btn btn-block btn-sm">${option.name}</button>`));
             }
+            uc.append(`<button onclick="logout()" style="margin-top:10px;" class="btn btn-block">Logout</button>`)
         }
 
         window.clearAlerts = () => {
@@ -403,11 +397,14 @@ app.controller('layerController', [
         }
 
         $scope.modal = (id) => {
-            if (id == "logout") {
-                window.logout();
-                return;
-            }
+
             $(`#${id}`).modal('toggle');
+        }
+
+        window.logout = () => {
+            delete window.localStorage.token;
+            window.location = "/login.html";
+            return;
         }
 
         window.modal = $scope.modal;
@@ -416,15 +413,6 @@ app.controller('layerController', [
             window.history.back();
         }
 
-        window.logout = () => {
-            $http({
-                method: "GET",
-                url: "/api/logout",
-                headers: {},
-            }).then(function successCallback(response) {
-                window.location = "/login.html";
-            })
-        }
 
         $scope.getToolbarAlerts = () => {
             $scope.Do("GET", "alerts", {}, (data) => {
@@ -464,15 +452,19 @@ app.controller('layerController', [
             return $scope.apps.length >= $scope.planMaxs[$scope.plan_id];
         }
 
-        Ape.Request("GET", "/api/is_loggedin", {}, (data) => {
-            if (!data) {
-                window.location = "/login.html";
-                return;
-            }
-            $scope.ready = true;
+
+        if (!window.localStorage["token"]) {
+            window.location = "/login.html";
+        }
 
 
-            // initialize toolbar jquery plugins
+        $scope.initScope = () => {
+
+
+
+            // initialize toolbar jquery plugins    
+            var data = Object.assign({} ,window.localStorage);
+
             pasync(() => {
                 $("a[data-placement].alerts").popover({});
                 $("a[data-placement].account").popover({});
@@ -480,8 +472,8 @@ app.controller('layerController', [
             $scope.name = data.name;
             $scope.id = data.id;
             Ape.Init({
-                base: "https://storehub.gophersauce.com/api/res",
-                headers: {},
+                base: "https://storehub.gophersauce.com/api/res/",
+                headers: { token : data.token },
                 start: () => {
 
                 },
@@ -491,7 +483,7 @@ app.controller('layerController', [
                             $scope.sessionExpired = true;
                             alert("Your session expired, please login again.")
                         }
-                        window.location = "/login.html";
+                      window.location = "/login.html";
                     }
 
                     if (response.error && response.error.includes("app") && res.status == 401) {
@@ -503,12 +495,12 @@ app.controller('layerController', [
                     }
                 }
             });
-            $scope.Do = Ape.Request;
-            $scope.Ape = Ape;
 
+            $scope.Do = Ape.Request;
             $scope.getToolbarAlerts();
             $scope.getUserApps();
-        })
+            $scope.ready = true;
+        }
 
         //CHECK FOR QUERIES
         var success = getUrlParameter("success"),
@@ -521,6 +513,9 @@ app.controller('layerController', [
         if (error) {
             swal("error", error, "error");
         }
+
+        $scope.initScope();
+
     }
 ]);
 
@@ -588,7 +583,6 @@ function uploadFile(file, cb) {
                     window.nextTip();
             } catch (e) {
                 console.log(e);
-                console.log("Invalid JSON");
                 cb({ error: xhr.responseText == "" ? "Server wrote no response" : xhr.responseText })
             }
 
@@ -598,6 +592,4 @@ function uploadFile(file, cb) {
     fd.append('file', file);
     // Initiate a multipart/form-data upload
     xhr.send(fd);
-
-
 }
